@@ -1,0 +1,309 @@
+---
+title: "RCBD"
+format: html
+---
+
+# Introduction  
+The goals of this exercise are to:  
+- Create an analytical workflow for an **RCBD**, from data import through publication-ready plot  
+- Understand each of its components  
+
+# a) Setup  
+Here is where we load the packages we will use.  
+```{r setup}
+# Loading packages
+library(tidyverse) # for data wrangling and plotting
+library(car) # for Anova function
+library(lme4)
+library(broom) # for model residuals extraction
+library(emmeans) # for model mean extraction
+library(multcomp) # for pairwise comparison letter display
+```
+
+**IMPORTANT NOTE**:  
+We are using in this exercise the same data set as the one used for the CRD exercise. This is only for **teaching purposes!!**  
+
+In your own analysis, you should always analyze a given designed study data set based on the design that it was implemented with.  
+You should NOT analyze a given designed study with a different design than what it was implemented with.  
+
+This is not an option!  
+
+```{r data import}
+rcbd_df 
+
+rcbd_df
+```
+
+# b) EDA tables  
+```{r summary}
+summary(rcbd_df)
+```
+
+```{r glimpse}
+glimpse(rcbd_df)
+```
+# c) Wrangling
+```{r rcbd_dfw}
+rcbd_dfw <- rcbd_df %>%
+  mutate(rep = factor(rep),
+         nrate_kgha = factor(nrate_kgha),
+         krate_kgha = factor(krate_kgha) 
+         ) %>%
+  mutate(trtname = paste0(nrate_kgha,"+",krate_kgha))
+
+rcbd_dfw
+```
+
+
+```{r rcbd_dfw}
+summary(rcbd_dfw)
+```
+Number of replicates: 4  
+Number o treatments: 3 N rates x 3 K rates = 9  
+Number of observations: 4 x 9 = 36  
+Yield: from 2795 to 7445 kg/ha  
+
+# d) EDA plots  
+```{r n boxplot}
+ggplot(rcbd_dfw, aes(x = nrate_kgha, 
+                    y = yield_kgha,
+                    color = nrate_kgha)) +
+  geom_boxplot() +
+  geom_jitter() +
+  theme(legend.position = "none")
+```
+
+```{r k boxplot}
+ggplot(rcbd_dfw, aes(x = krate_kgha, 
+                    y = yield_kgha,
+                    color = krate_kgha)) +
+  geom_boxplot() +
+  geom_jitter() +
+  theme(legend.position = "none")
+```
+
+```{r nk boxplot}
+ggplot(rcbd_dfw, aes(x = nrate_kgha, 
+                    y = yield_kgha,
+                    color = nrate_kgha)) +
+  geom_boxplot() +
+  geom_jitter() +
+  facet_grid(.~krate_kgha) +
+  theme(legend.position = "none")
+```
+
+# e) Statistical model  
+## Set-to-zero vs. sum-to-zero  
+In R, the default contrast type is set-to-zero.  
+
+In research, we normally are interested in sum-to-zero contrasts.  
+
+Below we change the default to sum-to-zero ("contr.sum") before fitting the model.
+
+
+```{r model}
+# Changing to sum-to-zero contrast
+options(contrasts = c("contr.sum", "contr.poly"))
+
+# Model fitting
+rcbd_mod 
+
+# Summary
+summary(rcbd_mod)
+```
+
+## Model specification tips  
+Instead of specifying 
+          `nrate_kgha + krate_kgha + nrate_kgha:krate_kgha`,  
+we could have just used  
+                   `nrate_kgha*krate_kgha`.  
+
+R interprets the `*` as "give me all main effects and interactions".
+
+The more interacting effects a model has, the more efficient using the * becomes.  
+
+# f) ANOVA table  
+The `Anova()` function allows us to use **type 3 sum of squares**.  
+
+The common functions `aov()` and `anova()` use type 1 SS, which is the wrong choice IF have unbalanced data.
+
+If data is balanced, type 1 and 3 give same results.  
+
+For sake of peace of mind, it is simpler to just always use type 3.  
+
+```{r ANOVA}
+Anova(rcbd_mod, type=3)
+```
+Notice how rep (i.e., block in this case) has a significant effect.  
+
+This means that we **did well by blocking**, as it was able to absorb some of the overall variability and remove it from the error. Remember how **decreasing error SS** was one way to improve the model statistical power.  
+
+Since the interaction is significant here, we should extract means and perform pairwise comparisons for the interaction term.
+
+Before we do that, let's check our model assumptions. Remember, a model is only valid for inference (i.e., means and pwc) IF if fulfills the linear model assumptions.  
+
+# g) Linear model assumptions  
+## Extracting residuals
+First, let's extract our model residuals, and also create studentized residuals.  
+
+```{r rcbd_resid}
+rcbd_resid <- augment(rcbd_mod) %>%
+  mutate(.studresid=rstudent(rcbd_mod))
+
+rcbd_resid
+```
+
+Now, let's recap the linear model assumptions:  
+
+- Residual independence (no pattern)  
+- Residual variance homogeneity (homoscedasticity)  
+- Residual normality (discuss this!)  
+- Outlier detection (< -3 or > 3)  
+
+## Residual independence  
+- For this, we use the **fitted vs. residual plot**.  
+- What we want to see: no clear pattern in residuals, random cloud of points.  
+- What we do not want to see: clear pattern, for example, quadratic shape.  
+- Adding a `geom_smooth()` helps with that conclusion. We want to see the smooth line and error bands comprising 0 on the y axis.  
+
+```{r }
+ggplot(rcbd_resid, aes(x=.fitted, y=.studresid))+
+  geom_hline(yintercept = 0, color="red")+
+  geom_point(shape = 21,
+             fill = "purple", 
+             size = 3,
+             alpha = .7)+
+  #geom_smooth()+
+  geom_hline(yintercept = c(-3,3), color = "red")+
+  theme_bw()
+```
+
+Run the plot above with and without `geom_smooth()`.  
+Notice how it helps to see a pattern that otherwise it's hard to detect visually.  
+
+Although it seems like there is some pattern, I wouldn't worry here since the error of the smooth line comprises 0 in the y-axis.  
+
+## Residual homoscedasticity  
+- For this, we use the **fitted vs. residual plot**.  
+- What we want to see: no clear pattern in residuals, random cloud of points.  
+- What we do not want to see: residuals increasing as fitted value increases (fan shape).  
+- Adding a `geom_smooth()` helps with that conclusion. We want to see the smooth line and error bands comprising 0 on the y axis.  
+
+```{r }
+ggplot(rcbd_resid, aes(x=.fitted, y=.studresid))+
+  geom_hline(yintercept = 0, color="red")+
+  geom_point(shape = 21,
+             fill = "purple", 
+             size = 3,
+             alpha = .7)+
+  geom_smooth()+
+  geom_hline(yintercept = c(-3,3), color = "red")+
+  theme_bw()
+```
+Looks great! Next.  
+
+## Residual normality  
+- For this, we use the **quantile-quantile (QQ) plot** and **density plot**.    
+- What we want to see: residuals centered around 0 and following a normal distribution.  
+- What we do not want to see: skewed residuals that do not follow a normal distribution.  
+
+On the QQ plot, we want to see residuals on the black line, meaning they follow their theoretical normal distribution.  
+```{r}
+ggplot(rcbd_resid, aes(sample=.studresid))+
+  stat_qq(  shape = 21,
+            fill = "purple", 
+            size = 3,
+            alpha = .7
+  )+
+  stat_qq_line()+
+  labs(x = "Theoretical quantile",
+       y = "Sample quantile")+
+  theme_bw()
+```
+
+It's common for some residuals in the tails being off, especially with low N (N=36). Nothing to worry here.  
+
+
+```{r}
+ggplot(rcbd_resid, aes(x=.studresid))+
+  geom_density(color = "black",
+               fill = "purple",
+               alpha = .7)+
+  scale_x_continuous(breaks = c(-3,0,3), limits = c(-3,3))+
+  theme_bw()
+
+```
+The peak of the density is slightly off, lower than 0, but nothing to worry.  
+
+Next.  
+
+## Residual outliers  
+- For this, we use the **fitted vs. residual plot**.  
+- What we want to see: most if not all residuals within [-3,3] on a studentized residual scale.  
+- What we do not want to see: too many residuals > 3 or < -3, the farther away form the thresholds the worse.  
+- Adding a `geom_hline()` at the thresholds helps to visualize and diagnose.   
+
+```{r}
+ggplot(rcbd_resid, aes(x=.fitted, y=.studresid))+
+  geom_hline(yintercept = 0, color="red")+
+  geom_point(shape = 21,
+             fill = "purple", 
+             size = 3,
+             alpha = .7)+
+  geom_smooth()+
+  geom_hline(yintercept = c(-3,3), color = "red")+
+  theme_bw()
+
+```
+All residuals are within the [-3, 3] interval, so nothing to worry here.  
+Now that model assumptions have been checked and met, we can proceed to using the model for inference.  
+
+# h) Model means  
+The next step in the workflow is extracting the model means.  
+
+Whenever we are showing means (in tables or plots), we want them to be from a model, and not simply the arithmetic mean in the raw data (like we would get with `group_by()` and `summarise()`).  
+
+This is specially important IF the data is unbalanced (i.e., missing data), in which case model means are DIFFERENT from arithmetic means on raw data. 
+
+Also, when extracting means from an interaction, there are few different ways of doing it, and which one we do depends on the study objectives.
+
+Remember that it is at this level that we establish the hierarchy of how our pairwise comparisons will be performed.  
+
+Let's extract it by comparing everything to everything else.
+```{r interaction means all}
+rcbd_means_all 
+
+rcbd_means_all
+```
+
+# i) Pairwise comparisons  
+Now that we extracted means, let's perform pairwise comparisons among them.  
+
+```{r interaction pwc all}
+rcbd_cld_all <- cld(rcbd_means_all, 
+                   reversed=T, 
+                   adjust="none",
+               Letters=letters)
+
+rcbd_cld_all
+```
+
+Let's do some light wrangling here to be able to plot these.  
+
+```{r selected pwc}
+rcbd_cld_selected <- rcbd_cld_all 
+
+rcbd_cld_selected
+```
+
+# g) Final plot  
+Let's plot our results, including both **raw data** (for allowing our audience to inspect data distribution) and **statistical model summary (i.e., letter separation)** for inference purposes.    
+Let's make this plot publication ready.  
+
+```{r rcbd final plot}
+
+```
+
+
+
+

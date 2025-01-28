@@ -1,0 +1,131 @@
+---
+title: "Assignment 3 - CRD"
+author: "YOUR NAME HERE"  
+format:
+  html:
+    code-fold: false
+    embed-resources: true
+    toc: true
+    number-sections: false
+    theme: cerulean
+---
+
+# Introduction  
+This assignment will ask you to conduct a full CRD analysis, from data import through publication ready plot.  
+
+For that, you will first need to watch (and code along with) the following CRD videos:
+
+- CRD lecture: https://youtu.be/r5vsakgqMXc?si=8udshzlpZ-8td1f4&t=4941 (starts at 1:22:21, watch till end)
+
+- CRD lecture pt 2, lab pt 1: https://youtu.be/GpfHxh1eK5U?si=nTle5YcB8JQklja2 
+(watch whole video)  
+
+- CRD lab pt 2: https://youtu.be/YQ1bK6uV194?si=LnDzRT69OsiMLc-r
+(wathc the whole video)  
+
+**AFTER watching the videos and developing the code in class**, then start working on this HW assignment.  
+
+The different sections representing what we did in class were left in the script to provide you a scaffold to start from.  
+
+# Instructions  
+  - Move this script into the `code` subfolder of your `03_crd` project folder  
+  - Move the file `wheat_nk_bamyan.csv` into the `data` folder of your `03_crd` project folder  
+  - On this script, fill your name under the `title` section of the YAML  
+
+# a) Setup  
+Here is where we load the packages we will use.  
+Make sure to load each package in the chunk below.  
+```{r setup}
+
+
+```
+
+Now, import the data set `wheat_nk_bamyan.csv` in the chunk below.  
+```{r data import}
+
+
+```
+
+The **objective of this study** was to assess the effect of different N and K rates on wheat yield.  
+
+For that, a study was conducted using a completely randomized design as the experimental design with four replicates. The treatment design was a 3 N x 3 K rate factorial, for a total of 9 treatments.  
+
+
+# b) EDA tables  
+Use this space to conduct exploratory data analysis of the imported data, in the form of tables.  
+
+
+# c) Wrangling  
+Here, make sure to wrangle your data set with all needed steps. Refer back to class code if you need a refresher on what was needed.  
+
+
+# d) EDA plots  
+Now, explore the wrangled data using plots.  
+Make sure to explore plots showing the main effects and the interaction.  
+
+## Question 1) Below each plot of this section, write a sentence explaining your visual interpretation of the plot.  
+
+# e) Statistical model  
+In this section, run the appropriate model.  
+Remember to set the contrast type to sum-to-zero (the default in R is set-to-zero, which is not what we want).  
+
+Also, remember to specify all model terms needed for the treatment design.  
+
+# f) ANOVA table  
+Use this section to check the ANOVA table, ensuring you use type 3 sum-of-squares.
+
+
+## Question 2) Based on the ANOVA table above, for which effect(s) in the ANOVA should you extract means and perform pair-wise comparisons? Explain why.  
+
+
+# g) Linear model assumptions  
+Use this section to first compute your residuals, including studentdized residuals.  
+
+## Question 3) What are the linear model assumptions that we need to check for? Create subsections (using ##) below for each of these assumptions, and write code to produce plots to check for these assumptions. For each assumption, write down your interpretation of the produced plots, and your thoughts if the assumptions hold or not.  
+
+# h) Model means  
+Use this section to extract model means according to your decision of the ANOVA table effects.  
+
+# i) Pairwise comparisons  
+Use this section to perform pair-wise comparison of the means extracted above.  
+
+Make sure to reverse the order from high to low, use letters instead of numbers, and no adjustment.  
+
+# g) Final plot(s)  
+Produce final plot(s) to show your results.  
+Make sure to include both **raw data** and **statistical model summary (i.e., letter separation)**.  
+
+Be mindful of your plot to ensure you are creating it in an intuitive way for your audience in relation to interpreting the letter separation structure you used.  
+
+In class, we did not have time to make it publication-ready (e.g., a plot looking professional and ready to be included in a manuscript).
+
+Here, make sure you deliver final plot(s) that is/are publication ready.  
+
+Make sure to provide an interpretation for the plot(s) created, including which treatment levels were significantly higher/lower.
+
+
+# Submitting your work  
+Once you have developed all the code and answers, make sure to Render this quarto file.  
+
+**Notes on rendering**:  
+
+- Make sure to render your work and inspect how the final html look like.  
+- If it does not look professional for whatever reason, then fix the issue, re-render it, recheck.  
+- Only send me your work once your html file looks professional.  
+  - **DO NOT** delete the file's heading levels (# and ##). They set up the proper heading 1 and 2 levels, and I use them to guide my grading.  
+  - If a given chunk is also outputting warnings or messages, inhibit this behavior by changing the chunk options `message` and `warning` to `FALSE` (I'll demo this in a moment).  
+  
+  - If, after rendered, 2 lines of text are connected and you wish to "break line" between them, add 2 extra spaces after the first one (I'lld demo this in a moment).  
+
+After rendering, an .html file will be created on your `code` folder.  
+
+Rename this file to `Assignment-03-crd-LASTNAME.html`.    
+
+For ex., mine would be `Assignment-03-crd-Bastos.html`.
+
+Submit your work by uploading the **html** file to **eLC Assigment #3 - CRD** by Feb 3rd 11:59 pm.  
+  
+
+
+
+
