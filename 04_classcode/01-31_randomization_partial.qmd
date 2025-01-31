@@ -1,0 +1,146 @@
+---
+title: "Randomization"
+format: html
+---
+
+# Introduction  
+The goals of this exercise are to:  
+- Learn how to randomize CRD and RCBD in R  
+- Learn how to create plot layouts with them  
+
+# Setup  
+Here is where we load the packages we will use.  
+```{r setup}
+# Loading packages
+library(tidyverse) # for data wrangling and plotting
+```
+
+# Treatment design  
+Keeping with the same motivational example we've been using, our treatment design is:  
+
+-   2-way factorial\
+-   N fertilizer rates: 0, 100, 200 kg N/ha\
+-   K fertilizer rates: 0, 30, 60 kg K/ha\
+-   3 x 3 = **9 treatment combinations**
+
+Let's define our treatments above in an object.  
+```{r}
+trts 
+
+trts
+```
+
+
+# CRD  
+## Randomization  
+Since it is a CRD, randomization is unrestricted.  
+
+```{r crd_rand}
+# Setting seed to get same randomization result every time
+set.seed(930)
+
+crd_rand  
+  # Since plots are organized without a structure, let's number them 1 through 36
+
+  # Randomizing trtname to plots, without restrictions 
+
+
+crd_rand
+```
+
+## Plot layout  
+Let's create a structure for plot layout in different rows and columns.  
+The number of rows and columns could be decided based on the actual field layout. For ex., do you have enough space for 9 columns and 4 rows, or 9 rows and 4 columns?  
+
+Let's assume we have space for 9 rows and 4 columns.  
+
+```{r crd_layout}
+crd_layout 
+  # Defining number of rows and columns in the field for plotting purposes
+
+  # Creating plot and trtname labels for plotting
+
+```
+
+Now, let's plot it.
+```{r crd map}
+
+
+```
+
+Notice how due to unrestricted randomization, we had the replication of some treatments falling in neighboring plots, e.g. plots 12 and 13 have the same treatment.  
+
+
+# RCBD  
+## Randomization  
+```{r rcbd_rand}
+# Setting seed to get same randomization result every time
+set.seed(930)
+
+rcbd_rand 
+
+rcbd_rand
+```
+
+Let's check if in fact each treatment appears once per block.  
+```{r}
+rcbd_rand 
+```
+
+## Plot layout  
+```{r rcbd_layout}
+rcbd_layout <- rcbd_rand %>%
+  # Defining number of rows and columns in the field for plotting purposes
+  mutate(row = rep(1:4, each = 9)) %>%
+  mutate(col = rep(seq(from = 1, 
+                       to = 9, #total number of treatments, 
+                       by = 1), 
+                   times = 4 #total number of blocks
+  )) %>%
+  # Creating plot and trtname labels for plotting
+  mutate(lab = paste0(plot, "\n", trtname))
+
+rcbd_layout
+```
+
+Now, let's plot it.
+```{r rcbd map}
+ggplot(data = rcbd_layout, aes(x = row, 
+                               y = -col))+
+  geom_tile(aes(fill = trtname),
+            color = "black",
+            show.legend = F
+  )+
+  geom_text(aes(label = plot), fontface = "bold", vjust = -.8)+
+  geom_text(aes(label = trtname), vjust = 1)+
+  labs(title = "RCBD randomization of a 3 x 3 factorial (9 treatments)") +
+  theme_void()
+
+```
+
+Notice how now each treatment appears only once per column, where column represents the reps or blocks.  
+
+# Exporting to file  
+If this is in fact your study, you may want to export both the field randomization table AND the layout map.  
+
+Let's do that below for the RCBD example.  
+
+```{r}
+rcbd_rand 
+  # Retrieving other information contained in trts
+
+  # Rearranging columns  
+
+
+```
+
+`ggsave()` will save the last plot created in the session, even if from an above chunk. Since the last plot we created was the RCBD layout, we can just go ahead and call ggsave here.  
+
+```{r}
+ggsave("../output/rcbd_layoutmap.png",
+       width = 6,
+       height = 4,
+       bg = "white")
+```
+
+

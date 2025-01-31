@@ -35,8 +35,8 @@ The different sections representing what we did in class were left in the script
 # a) Setup  
 Here is where we load the packages we will use.  
 Make sure to load each package in the chunk below.  
-```{r setup}
-
+```{r setup, warning=FALSE, message=FALSE}
+library(tidyverse)
 
 ```
 
@@ -53,6 +53,9 @@ For that, a study was conducted using a completely randomized design as the expe
 
 # b) EDA tables  
 Use this space to conduct exploratory data analysis of the imported data, in the form of tables.  
+```{r}
+
+```
 
 
 # c) Wrangling  
@@ -70,6 +73,7 @@ In this section, run the appropriate model.
 Remember to set the contrast type to sum-to-zero (the default in R is set-to-zero, which is not what we want).  
 
 Also, remember to specify all model terms needed for the treatment design.  
+
 
 # f) ANOVA table  
 Use this section to check the ANOVA table, ensuring you use type 3 sum-of-squares.
