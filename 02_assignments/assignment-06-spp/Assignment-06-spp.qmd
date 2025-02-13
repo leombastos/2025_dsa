@@ -1,0 +1,81 @@
+---
+title: "Assignment 6 - Split-plot randomization"
+author: "YOUR NAME HERE"  
+format:
+  html:
+    code-fold: false
+    embed-resources: true
+    toc: true
+    number-sections: false
+    theme: cerulean
+---
+
+# Introduction  
+This assignment will ask you to conduct a split-plot RCBD randomization. 
+
+For that, you will first need to watch (and code along with) the following split-plot randomization video:
+
+- split-plot randomization: https://youtu.be/rXTp3Vw_770?si=MajBK1aZ221orfpa&t=3401 (starts at 00:56:41, watch till end, about 50-min total)
+
+
+**AFTER watching the video and developing the code in class**, then start working on this HW assignment.  
+
+The different sections representing what we did in class were left in the script to provide you a scaffold to start from.  
+
+# Instructions  
+  - Move this script into the `code` subfolder of your `05_spp` project folder  
+  - On this script, fill your name under the `title` section of the YAML  
+
+# a) Setup  
+Here is where we load the packages we will use.  
+Make sure to load each package in the chunk below.  
+```{r setup, warning=FALSE, message=FALSE}
+library(tidyverse)
+
+```
+
+
+
+# b) Treatment design  
+
+
+# Split-plot in RCBD  
+## WP randomization  
+
+
+## SP randomization  
+
+## Joining WP and SP into one object
+
+
+## Plot layout  
+
+
+# Exporting to file  
+
+
+# Submitting your work  
+Once you have developed all the code and answers, make sure to Render this quarto file.  
+
+**Notes on rendering**:  
+
+- Make sure to render your work and inspect how the final html look like.  
+- If it does not look professional for whatever reason, then fix the issue, re-render it, recheck.  
+- Only send me your work once your html file looks professional.  
+  - **DO NOT** delete the file's heading levels (# and ##). They set up the proper heading 1 and 2 levels, and I use them to guide my grading.  
+  - If a given chunk is also outputting warnings or messages, inhibit this behavior by changing the chunk options `message` and `warning` to `FALSE` (I'll demo this in a moment).  
+  
+  - If, after rendered, 2 lines of text are connected and you wish to "break line" between them, add 2 extra spaces after the first one (I'lld demo this in a moment).  
+
+After rendering, an .html file will be created on your `code` folder.  
+
+Rename this file to `Assignment-06-spp-LASTNAME.html`.    
+
+For ex., mine would be `Assignment-06-spp-Bastos.html`.
+
+Submit your work by uploading the **html** file to **eLC Assigment #6 - Split-plot randomization** by Feb 20 11:59 pm.  
+  
+
+
+
+
