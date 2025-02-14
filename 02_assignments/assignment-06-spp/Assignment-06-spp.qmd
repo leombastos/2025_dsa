@@ -3,10 +3,10 @@ title: "Assignment 6 - Split-plot randomization"
 author: "YOUR NAME HERE"  
 format:
   html:
-    code-fold: false
+    code-fold: true 
     embed-resources: true
     toc: true
-    number-sections: false
+    number-sections: true
     theme: cerulean
 ---
 
@@ -17,6 +17,8 @@ For that, you will first need to watch (and code along with) the following split
 
 - split-plot randomization: https://youtu.be/rXTp3Vw_770?si=MajBK1aZ221orfpa&t=3401 (starts at 00:56:41, watch till end, about 50-min total)
 
+- The partial script for the video above is in our GitHub repository, 04-classcode, **02-13_spp_randomization_partial.qmd**.
+
 
 **AFTER watching the video and developing the code in class**, then start working on this HW assignment.  
 
@@ -25,18 +27,36 @@ The different sections representing what we did in class were left in the script
 # Instructions  
   - Move this script into the `code` subfolder of your `05_spp` project folder  
   - On this script, fill your name under the `title` section of the YAML  
+  
+# Goal of this assignment  
+The goal is this assignment is for you to **design a split-plot RCBD design applicable to your area of study**.  
 
-# a) Setup  
+This could be from your own experience, an example from the literature, or something you come up entirely on your own (as long as it makes sense).  
+
+In the headings below, you will answer a couple of questions related to study objectives and treatment design, and then move on to randomize your study, create a plot layout, and export the designed table to file.  
+
+# Setup  
 Here is where we load the packages we will use.  
 Make sure to load each package in the chunk below.  
 ```{r setup, warning=FALSE, message=FALSE}
-library(tidyverse)
 
 ```
 
 
 
-# b) Treatment design  
+# Treatment design  
+## Objectives  
+Write here what are the objectives of the study you are designing. Remember that objectives are closely connected with your treatment design, so whatever you say are your objectives should carry through on your choice of treatment factors and levels.  
+
+
+
+## Treatment design explanation  
+Here is where you explain your treatment design, including the name of the treatment factors, their levels (don't forget to include units), and which is the whole-plot treatment factor and which one is the split-plot treatment factor.  
+
+
+## Code  
+Here develop the code to setup your design (like in class).   
+
 
 
 # Split-plot in RCBD  
