@@ -720,5 +720,5 @@ ggplot(reg_dfw, aes(x = sr_ksha, y = yield_mgha))+
 
 -   Always check residuals! p-values alone do not tell you whether model is adequate for your data!
 
-
+# Quiz
 
