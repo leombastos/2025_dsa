@@ -1,0 +1,77 @@
+---
+title: "Assignment 7 - Repeated measure"
+author: "YOUR NAME HERE"  
+format:
+  html:
+    code-fold: true 
+    embed-resources: true
+    toc: true
+    number-sections: true
+    theme: cerulean
+---
+
+# Introduction  
+This assignment will ask you to conduct a repeated measure analysis. 
+
+For that, you will first need to watch (and code along with) the following repeated measure video:
+
+- repeated measure lecture: https://youtu.be/-ANqcQhB--A?si=7YeeYqDgcLsj5erW&t=4268 (starts at 01:11:08, watch till the end, about 50 min)
+
+- repeated measure lab part 1: https://youtu.be/GY2e-9M5bFM?si=TIw5F4EF2m9Dx5uK (watch full video, ~1h 50 min)  
+
+- repeated measure lab part 2: https://youtu.be/F3vg89ymLeM?si=Zv-RPIdS8mig4EMb
+(watch full video, ~2h)
+
+- The partial script for the video above is in our GitHub repository, 04-classcode, **03-11_repeatedmeasure_partial.qmd**.  
+
+- The data set for this exercise is in oir GitHub repository, 03-classcode, **wheat_nk_balkh_rm.csv**.
+
+
+**AFTER watching the video and developing the code in class**, then start working on this HW assignment.  
+
+# Instructions  
+
+  - Create on your GitHub a repo named `06_rm`.  
+  - Clone it to your computer, create the necessary subfolders.
+  - Move the script **03-11_repeatedmeasure_partial.qmd** into the `code` subfolder.
+  - Move this script into the `code` subfolder  
+  - Move the **wheat_nk_balkh_rm.csv** data set into the `data` subfolder  
+  - On this script, fill your name under the `title` section of the YAML  
+  
+# Goal of this assignment  
+The goal is this assignment is for you to **learn about and conduct a full repeated measure analysis**.
+
+Once you finish coding along with the videos, answer the following questions.
+
+# Questions  
+In class, we decided to use AIC as the metric to select the best model, and this determined the best model to be the one with a general error correlation matrix structure. If we had used BIC as the metric, then the model selected would have been the default model. Here, you are asked to use BIC and thus select the default model as the best, and perform all the steps after model selection. You may copy and paste the class script, and adapt the copied version to implement these changes.  
+
+## Q1: Include here the residual assessment of the default model. Include each plot and its interpretation. How do these residuals from the default model visually compare to those from the general model?  
+
+## Q2: Include here the ANOVA table from the default model. How does it compare with the ANOVA table from the general model?  
+
+# Submitting your work  
+Once you have developed all the code and answers, make sure to Render this quarto file.  
+
+**Notes on rendering**:  
+
+- Make sure to render your work and inspect how the final html look like.  
+- If it does not look professional for whatever reason, then fix the issue, re-render it, recheck.  
+- Only send me your work once your html file looks professional.  
+  - **DO NOT** delete the file's heading levels (# and ##). They set up the proper heading 1 and 2 levels, and I use them to guide my grading.  
+  - If a given chunk is also outputting warnings or messages, inhibit this behavior by changing the chunk options `message` and `warning` to `FALSE` (I'll demo this in a moment).  
+  
+  - If, after rendered, 2 lines of text are connected and you wish to "break line" between them, add 2 extra spaces after the first one (I'lld demo this in a moment).  
+
+After rendering, an .html file will be created on your `code` folder.  
+
+Rename this file to `Assignment-07-rm-LASTNAME.html`.    
+
+For ex., mine would be `Assignment-07-rm-Bastos.html`.
+
+Submit your work by uploading the **html** file to **eLC Assigment #7 - Repeated measure** by Mar 25 11:59 pm.  
+  
+
+
+
+

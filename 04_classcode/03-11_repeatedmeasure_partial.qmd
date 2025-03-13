@@ -1,0 +1,799 @@
+---
+title: "Repeated measure"
+format: html
+---
+
+# Learning objectives  
+Today's learning objectives are to:  
+- Fit different repeated measure correlation structures to a split-plot RCBD design  
+- Select the model with best fit (as assessed with AIC and BIC)  
+- Make inference (means and pairwise comparisons) using the selected model  
+
+# Introduction  
+Continuing with the motivational example we've been using in class where we have:  
+-   2-way factorial in a **split-plot**  
+-   **Whole-plot**: K fertilizer rates: 0, 30, 60 kg K/ha\
+-   **Split-plot**: N fertilizer rates: 0, 100, 200 kg N/ha\
+-   3 x 3 = **9 treatment combinations**  
+-   RCBD with 4 blocks  
+
+Up until now, our response variable has been **yield** measured **once** at the end of the season.  
+
+What if we measured yield at **4 different time points**, where a different row of each plot was harvested at different time points?  
+
+Research questions of interest:  
+
+  - Interaction between Treatment and Time  
+  - Does the effect of treatment change over time?  
+  - How do treatments compare at any given time point?  
+
+Because **harvest time** is non-randomizable, it configures as a repeated measure variable and therefore requires that we exlpore the potential correlation among different time points using **repeated measure ANOVA**.  
+
+For that, we'll fit different correlation structures to the model error matrix.  
+
+> Our goal is to find the correlation structure that best describes the correlation in the errors, and no simpler nor more complex than needed.  
+
+IF correlation structure is **too simple**, model **standard errors are underestimated** (finds more differences where maybe there shouldn't exist)  
+
+IF correlation structure is **too complex**, **statistical power and efficiency suffer**.  
+
+Inadequate modeling of correlation structures may result in biased estimates of variance of estimates of fixed effects
+
+Let's implement that below.
+
+# Setup and wrangling  
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse) # for data wrangling and plotting
+library(car) # for Anova function
+library(lme4)
+library(broom) # for model residuals extraction
+library(emmeans) # for model mean extraction
+library(multcomp) # for pairwise comparison letter display
+library(nlme) # for repeated measure correlation structures 
+
+```
+
+Reading data and doing some light wrangling.  
+```{r}
+#| message: false
+rm_rcbd_df 
+
+rm_rcbd_df
+```
+
+# EDA  
+```{r}
+summary(rm_rcbd_df)
+```
+
+```{r}
+ggplot(rm_rcbd_df, aes(x = fdap, 
+                       y = yield_kgha)) 
+```
+
+Yield was measured at 4 time points, in days after planting (dap):  
+  - 120  
+  - 130  
+  - 140  
+  - 150  
+
+Notice how the **interval among the different harvest times is the same** (i.e., 10 days).  
+
+That allows us to test all of the correlation structures mentioned in the lecture, including:  
+1. Serial correlation structures:  
+  - Compound symmetry  
+  - General  
+  - Auto-regressive of order 1 (AR1)  
+  - Auto-regressive of order 1, moving average
+
+2. Spatial correlation structures:  
+  - Exponential  
+  - Gaussian  
+  - Linear  
+  - Rational quadratic  
+  - Spherical
+  
+Let's begin by running the default model, which assumes correlation of zero.
+
+# Model 1 - default  
+First, let's fit the default model using `lmer()`, which is the function we have used until now.  
+
+On the previous exercise of split-plot on RCBD with random blocks, our random effect term was (1 | block/krate_kgha).  
+
+Now, because we have repeated measures that were performed at the split-plot experimental unit level, we need to incorporate that into the random effects. 
+
+The way to do that is to include the next level of the hierarchy (i.e., nrate_kgha) as part of the random effects, and leave the smallest level (fdap) to be what is left in the residuals.  
+
+We also want to have `fdap` into the fixed effects so we can estimate their means.  
+
+
+```{r} 
+options(contrasts = c("contr.sum", "contr.poly"))
+
+mod1_default_lmer 
+
+mod1_default_lmer
+
+```
+
+The model above was fit with `lmer()`, which works great unless you need to specify different correlation structures, which it does not accomodate.  
+
+To overcome that, we'll use `lme()` function, which allows for the specification of random effects AND different correlation structures.  
+Let's refit our default model but now with `lme()`.  
+
+The syntax is a bit different where now random effects are specified in their own argument instead of in the formula argument along with the fixed effects. 
+
+```{r}
+mod1_default 
+
+mod1_default
+```
+
+Both of these models are equivalent.
+
+Let's check the ANOVA table for the `lme()` fitted model.  
+
+```{r}
+Anova(mod1_default, type = 3)
+```
+
+> What is significant here at alpha = 0.05?  
+> Which means would you extract and perform pairwise comparison at this alpha level?  
+
+> What is significant here at alpha = 0.1?  
+> Which means would you extract and perform pairwise comparison at this alpha level?  
+
+## empirical autocorrelation function  
+Let's assess the autocorrelation of the model residuals with the `ACF()` function. 
+
+This function calculates the **empirical autocorrelation function** for the **within-group residuals** (i.e., model residuals, eijk) from an lme fit. 
+
+The autocorrelation values are calculated using pairs of residuals within the innermost group level (i.e., model residuals, eijk). 
+
+The autocorrelation function is useful for investigating serial correlation models for equally spaced data.
+```{r}
+
+```
+Notice we have 4 lags: 0, 1, 2, and 3. These are corresponding to each of the harvest times.  
+
+The dashed lines on this plot are testing the hypothesis of autocorrelation being significantly different than 0. 
+
+**If the autocorrelation goes over the dashed lines, then autocorrelation at that given lag is significantly different than 0, and thus should be taken care of.**  
+
+Autocorrelation at lag = 0 is always high (correlation of a time point with itself), so we ignore lag = 0 when inerpreting the plot.  
+We see here that **autocorrelation at lags 1 and 2 go beyond the dashed line**, so that's what we will try to **address with repeated measure analysis**.  
+
+# Model 2 - Compound Symmetry  
+```{r}
+mod2_cs 
+
+mod2_cs
+```
+Notice how we have a **rho** estimate above, which is the estimated correlation parameter.  
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod2_cs, resType = "n") %>%
+  plot(alpha = 0.01)
+
+```
+Autocorrelations at all lags are way smaller than before, showing that CS was able to model them well.  
+
+Nest, let's check the confidence interval on the rho estimate.
+
+## interval on rho  
+```{r}
+
+```
+The interval of rho includes the value of 0, so not statistically significant, even though it removed the autocorrelation from the residuals.  
+
+Next, let's compare the default model and the CS model.  
+
+For that, we are going to use the function `anova()` from the `nlme` package. 
+
+This is not the same function that we've seen before.  
+
+This function will compute model metrics that will allow us to compare the different models, including **Aikaike Information Criteria (AIC) and Bayesian Information Criteria (BIC)**.  
+
+These fit metrics are intended to use for comparing models fit using restricted maximum likelihood (**REML**, the default method in `lme()`) and with the **same fixed effects**. 
+
+For AIC and BIC, the **smaller the value the better (best fit)**.
+
+AIC and BIC will only be lower when the extra parameters calculated in a more-complex model explain relatively more information than they consumed dfs.
+
+More complex models that do not explain relatively more information cause an increase in AIC and BIC (poorer fit).
+
+This makes AIC and BIC great measures to **choose parsimonious models (not too simple, not too complex, just right)**.
+
+Sometimes, AIC and BIC do not agree on which model has the lowest value and thus the best model. **BIC** is more conservative than AIC, and the choice of which metric to use is up to the user.  
+
+## comparison  
+```{r}
+
+
+```
+A few things to notice:  
+  - **df column**: this represents the numerator degrees of freedom of a given model. The larger this number, the more parameters are benig estimated.  
+  - **AIC and BIC columns**: the values we see here are specific to these models, and their magnitude is not really meaningull. What we are looking for here is **relative differences** when comparing models.   
+
+Compared to the default model, the CS model increased fit metrics, demonstrating a poorer fit.  
+
+This is likely because it estimated extra parameters than the default (1 more df consumed), while their inclusion in the model did not help in better explaining the variability (and their sources) in the model. 
+
+Thus, more parameters (more complex model) without a corresponding improvement in model fit generates a model that is less appropriate.  
+
+# Model 3 - General  
+```{r}
+mod3_gen <- lme(
+  yield_kgha ~ krate_kgha*nrate_kgha*fdap,
+  random = ~ 1|block/krate_kgha/nrate_kgha,
+
+  data = rm_rcbd_df)
+
+mod3_gen
+```
+Notice the many different values in the matrix.  
+
+This is the most complex structure, and often times it does not converge (i.e., does not work).  
+
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod3_gen, resType = "n") %>%
+  plot(alpha = 0.01)
+```
+Although smaller compared to the default model, autocorrelation at lag = 1 is just below the significant threshold, but lag = 4 became significant.  
+
+## interval on rho  
+```{r}
+intervals(mod3_gen, which = "var-cov")
+```
+Unable to calculate intervals on correlation coefficients. 
+
+## comparison  
+Let's compare all three models.  
+```{r}
+anova(mod1_default, 
+      mod2_cs,
+      mod3_gen)
+```
+The general correlation matrix model consumed **6 more dfs** than the default model (to estimate those correlation coefficients we saw above). 
+
+This model **decreased AIC** but **increased BIC** compared to the default model. Here's an interesting case where the different metrics do not agree.  
+
+# Model 4 - Autoregressive order 1 (AR1)  
+```{r}
+mod4_ar1 <- lme(
+  yield_kgha ~ krate_kgha*nrate_kgha*fdap,
+  random = ~ 1|block/krate_kgha/nrate_kgha,
+
+  data = rm_rcbd_df)
+
+mod4_ar1
+```
+Notice how we have a **phi** estimate above, which is the estimated correlation parameter.  
+
+In this case, it was estimated as zero.
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod4_ar1, resType = "n") %>%
+  plot(alpha = 0.01)
+```
+Autocorrelation at lags = 1 and 2 are still significant.
+
+## intervals  
+```{r}
+intervals(mod4_ar1, which = "var-cov")
+```
+Unable to calculate confidence interval for the estimate of correlation, likely because the estimate was 0.  
+
+## comparison
+```{r}
+anova(mod1_default, 
+      mod2_cs, mod3_gen, mod4_ar1)
+```
+AR1 model had the same dfs and fit metrics as the CS model.  
+  
+# Model 5 - Autoregressive order moving average (ARMA11)  
+```{r}
+mod5_arma11 <- lme(
+  yield_kgha ~ krate_kgha*nrate_kgha*fdap,
+  random = ~ 1|block/krate_kgha/nrate_kgha,
+
+  data = rm_rcbd_df)
+
+mod5_arma11
+```
+Notice how we have a **phi1** and **theta1** estimates above, which are the estimated correlation parameters for this model.  
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod5_arma11, resType = "n") %>%
+  plot(alpha = 0.01)
+```
+Autocorrelation at lags = 1 and 2 are still significant.
+
+## intervals  
+```{r}
+intervals(mod5_arma11, which = "var-cov")
+```
+Both estimate intervals include zero, so not significant.  
+
+## comparison
+```{r}
+anova(mod1_default, 
+      mod2_cs, mod3_gen, mod4_ar1, mod5_arma11)
+```
+ARMA11 consumed 1 more df and overall increased AIC and BIC (poorer fit).  
+
+# Model 6 - Exponential  
+Let's fit our first **spatial** correlation structure.  
+
+```{r}
+mod6_exp <- lme(
+  yield_kgha ~ krate_kgha*nrate_kgha*fdap,
+  random = ~ 1|block/krate_kgha/nrate_kgha,
+
+  data = rm_rcbd_df)
+
+mod6_exp
+```
+Notice how we have a **range** estimate above, which is the estimated correlation parameter for spatial models.  
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod6_exp, resType = "n") %>%
+  plot(alpha = 0.01)
+```
+Lags 1 and 2 still correlated.  
+
+With spatial correlation structures, we can obtain the semivariogram to inspect model fit.  
+
+## variogram  
+```{r}
+Variogram(mod6_exp) %>%
+  plot() 
+```
+A few things to notice:  
+  - We only have 4 time points, which creates 3 distances on the semivariogram.  
+  - Having only 3 distances makes it **very difficult to fit a semivariogram** of any sort, and that's what we see above.  
+  - The actual exponential line is not even appearing in the plot (i.e., it did not fit the data)  
+  - Based on this, I would not expect for this model to perform well in our data.  
+  
+  
+## interval on range  
+```{r}
+intervals(mod6_exp, which = "var-cov")
+```
+range interval does not include 0, so it is significant.
+
+## comparison
+```{r}
+anova(mod1_default, 
+      mod2_cs, mod3_gen, mod4_ar1, mod5_arma11,
+      mod6_exp)
+```
+Although model 6 (exponential) did fix the autocorrelation issue and had a significant range estimate, it increased fit metrics when compared to other models. 
+
+Thus, our best candidate remains model 3 (general).    
+
+# Model 7 - Gaussian  
+```{r}
+mod7_gaus <- lme(
+  yield_kgha ~ krate_kgha*nrate_kgha*fdap,
+  random = ~ 1|block/krate_kgha/nrate_kgha,
+
+  data = rm_rcbd_df)
+
+mod7_gaus
+```
+Notice how we have a **range** estimate above, which is the estimated correlation parameter for spatial models.  
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod7_gaus, resType = "n") %>%
+  plot(alpha = 0.01)
+```
+Lags 1 and 2 still correlated.  
+
+## variogram  
+```{r}
+Variogram(mod7_gaus) %>%
+  plot() 
+```
+Same issue as with the exponential, no semivariogram fit.  
+
+## interval on range  
+```{r}
+intervals(mod7_gaus, which = "var-cov")
+```
+range interval does not include 0, so it is significant.  
+
+## comparison
+```{r}
+anova(mod1_default, 
+      mod2_cs, mod3_gen, mod4_ar1, mod5_arma11,
+      mod6_exp, mod7_gaus)
+```
+Although model 7 (gaussian) had a significant range estimate, it increased fit metrics when compared to other models. 
+
+Thus, our best candidate remains model 3 (general).  
+
+# Model 8 - Linear  
+```{r}
+mod8_lin <- lme(
+  yield_kgha ~ krate_kgha*nrate_kgha*fdap,
+  random = ~ 1|block/krate_kgha/nrate_kgha,
+
+  data = rm_rcbd_df)
+
+mod8_lin
+```
+Notice how we have a **range** estimate above, which is the estimated correlation parameter for spatial models.  
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod8_lin, resType = "n") %>%
+  plot(alpha = 0.01)
+```
+Lags 1 and 2 still correlated.  
+
+## variogram  
+```{r}
+Variogram(mod8_lin) %>%
+  plot() 
+```
+Same issue as the previous spatial models as far as not fitting the data.  
+
+## interval on range  
+```{r}
+intervals(mod8_lin, which = "var-cov")
+```
+range interval does not include 0, so it is significant.  
+
+## comparison
+```{r}
+anova(mod1_default, 
+      mod2_cs, mod3_gen, mod4_ar1, mod5_arma11,
+      mod6_exp, mod7_gaus, mod8_lin)
+
+```
+Although model 8 (linear) had a significant range estimate, it increased fit metrics when compared to other models, and had same fit metrics as model 7 (gaussian). 
+
+Thus, our best candidate remains model 3 (general).  
+
+
+# Model 9 - Rational Quadratic  
+```{r}
+mod9_rq <- lme(
+  yield_kgha ~ krate_kgha*nrate_kgha*fdap,
+  random = ~ 1|block/krate_kgha/nrate_kgha,
+
+  data = rm_rcbd_df)
+
+mod9_rq
+```
+Notice how we have a **range** estimate above, which is the estimated correlation parameter for spatial models.  
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod9_rq, resType = "n") %>%
+  plot(alpha = 0.01)
+```
+Lags 1 and 2 still correlated.  
+
+## variogram  
+```{r}
+Variogram(mod9_rq) %>%
+  plot() 
+```
+
+## interval on range  
+```{r}
+intervals(mod9_rq, which = "var-cov")
+```
+range interval does not include 0, so it is significant, although really wide interval (from 0 to 120).    
+
+## comparison
+```{r}
+anova(mod1_default, 
+      mod2_cs, mod3_gen, mod4_ar1, mod5_arma11,
+      mod6_exp, mod7_gaus, mod8_lin, mod9_rq)
+```
+Model 9 (rational quadratic) had a poorer fit compared to other spatial models.  
+
+Thus, our best candidate remains model 3 (general).  
+
+
+# Model 10 - Spherical  
+
+```{r}
+mod10_sph <- lme(
+  yield_kgha ~ krate_kgha*nrate_kgha*fdap,
+  random = ~ 1|block/krate_kgha/nrate_kgha,
+
+  data = rm_rcbd_df)
+
+mod10_sph
+```
+Notice how we have a **range** estimate above, which is the estimated correlation parameter for spatial models.  
+
+## empirical autocorrelation function  
+```{r}
+ACF(mod10_sph, resType = "n") %>%
+  plot(alpha = 0.01)
+```
+Lags 1 and 2 still correlated.  
+
+## variogram  
+```{r}
+Variogram(mod10_sph) %>%
+  plot() 
+```
+No fit like all other spatial models.  
+
+## interval on range  
+```{r}
+intervals(mod10_sph, which = "var-cov")
+```
+range interval does not include 0, so it is significant.  
+
+# Final model comparison and selection  
+```{r}
+anova(mod1_default, 
+      mod2_cs, mod3_gen, mod4_ar1, mod5_arma11,
+      mod6_exp, mod7_gaus, mod8_lin, mod9_rq, mod10_sph) 
+
+```
+After fitting the default model and comparing it to other 9 models that included serial and spatial correlation structures, we found that:  
+  - AIC (liberal) and BIC (conservative) disagreed on best model. This doesn't always happen.  
+  - If we use AIC as the fit metric, then the **general** model was the best.  
+  - If we use BIC as the fit metric, then the **default** model was the best.  
+  - Overall, **spatial** correlation structures did not work well with this specific data set.  
+  - Overall, our data set may not have had significantly correlated errors/residuals even though there was the potential for it due to the repeated measure nature.  
+
+At this point, our next steps will depend on the metric we decide to use:  
+
+  - If we use **AIC**, then we would select the **general model** to perform inference  
+  - If we use **BIC**, then we would select the **default model** to perform inference  
+  
+Let's assume that the general model was the best, and perform inference on it.  
+
+# Checking residuals  
+```{r}
+library(broom.mixed)
+mod3_gen_resid <- augment(mod3_gen) %>%
+  mutate(.stdresid=resid(mod3_gen, type="pearson", scaled=T))
+
+mod3_gen_resid
+```
+
+### Block random effects are iid ~ N(0,var_a)  
+```{r }
+ranef(mod3_gen)[[1]] %>%
+  ggplot(aes(sample=`(Intercept)`))+
+  stat_qq(  shape = 21,
+            fill = "purple", 
+            size = 3,
+            alpha = .7
+  )+
+  stat_qq_line()+
+  labs(x = "Theoretical quantile",
+       y = "Sample quantile")+
+  theme_bw()
+
+```
+
+### Block:krate random effects are iid ~ N(0,var_b)  
+```{r }
+ranef(mod3_gen)[[2]] %>%
+  ggplot(aes(sample=`(Intercept)`))+
+  stat_qq(  shape = 21,
+            fill = "purple", 
+            size = 3,
+            alpha = .7
+  )+
+  stat_qq_line()+
+  labs(x = "Theoretical quantile",
+       y = "Sample quantile")+
+  theme_bw()
+
+```
+
+### Block:krate:nrate random effects are iid ~ N(0,var_c)  
+```{r }
+ranef(mod3_gen)[[3]] %>%
+  ggplot(aes(sample=`(Intercept)`))+
+  stat_qq(  shape = 21,
+            fill = "purple", 
+            size = 3,
+            alpha = .7
+  )+
+  stat_qq_line()+
+  labs(x = "Theoretical quantile",
+       y = "Sample quantile")+
+  theme_bw()
+
+```
+
+### Within-group errors are iid ~ N(0, var_e)  
+```{r }
+ggplot(mod3_gen_resid, aes(x=.fitted, y=.stdresid))+
+  geom_hline(yintercept = 0, color="red")+
+  geom_point(shape = 21,
+             fill = "purple", 
+             size = 3,
+             alpha = .7)+
+  geom_smooth()+
+  geom_hline(yintercept = c(-3,3), color = "red")+
+  theme_bw()
+```
+
+```{r}
+ggplot(mod3_gen_resid, aes(sample=.stdresid))+
+  stat_qq(  shape = 21,
+            fill = "purple", 
+            size = 3,
+            alpha = .7
+  )+
+  stat_qq_line()+
+  labs(x = "Theoretical quantile",
+       y = "Sample quantile")+
+  theme_bw()
+
+```
+
+Except for a few points on the upper tail, everything looks great.
+
+We can proceed with inference.  
+
+# Inference - correct model  
+```{r anova}
+Anova(mod3_gen, type = 3)
+```
+> Looking at the ANOVA table above, which means would you extract?  
+
+## K x N x dap interaction  
+```{r}
+rm_rcbd_cld_kndap <- emmeans(mod3_gen, ~fdap|krate_kgha:nrate_kgha) %>%
+  cld(reversed = T,
+      Letters = letters,
+      adjust = "none"
+      ) %>%
+  as.data.frame() %>%
+  mutate(letter = trimws(.group)) %>%
+  mutate(trtname = paste0(nrate_kgha,"+",krate_kgha))
+
+rm_rcbd_cld_kndap
+```
+
+```{r}
+#| fig-width: 15
+#| fig-height: 5
+ggplot(mapping = aes(fill = fdap))+
+  # Raw data and boxplots  
+  geom_boxplot(data = rm_rcbd_df,
+               aes(x = fdap, y = yield_kgha),
+               alpha = .8) +
+  geom_jitter(data = rm_rcbd_df,
+               aes(x = fdap, y = yield_kgha),
+              shape = 21,
+              size = 3,
+              alpha = .6) +
+  # Adding letters
+  geom_label(data = rm_rcbd_cld_kndap,
+            aes(x = fdap, y = emmean, label = letter),
+            fill = "white") +
+  labs(x = "Harvest, days after planting",
+       y = "Yield (kg/ha)") +
+  scale_fill_viridis_d() +
+  facet_grid(.~trtname) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = "none")
+
+```
+
+Now, let's assume that had used the default model instead, what would have happened?  
+
+I'm going to skip the code for checking model assumptions for the default model, but you should do it if it were for your research.  
+
+# Inference - wrong model  
+```{r anova}
+Anova(mod1_default, type = 3)
+```
+> Take a moment to compare this ANOVA table with that from the general model (the one we ran just prior). Do you see any differences?  
+
+## K x N x dap interaction  
+```{r}
+rm_rcbd_cld_kndap_wrong <- emmeans(mod1_default, 
+                                   ~fdap|krate_kgha:nrate_kgha) %>%
+  cld(reversed = T,
+      Letters = letters,
+      adjust = "none"
+      ) %>%
+  as.data.frame() %>%
+  mutate(letter = trimws(.group)) %>%
+  mutate(trtname = paste0(nrate_kgha,"+",krate_kgha))
+
+rm_rcbd_cld_kndap_wrong
+```
+
+```{r}
+#| fig-width: 15
+#| fig-height: 5
+ggplot(mapping = aes(fill = fdap))+
+  # Raw data and boxplots  
+  geom_boxplot(data = rm_rcbd_df,
+               aes(x = fdap, y = yield_kgha),
+               alpha = .8) +
+  geom_jitter(data = rm_rcbd_df,
+               aes(x = fdap, y = yield_kgha),
+              shape = 21,
+              size = 3,
+              alpha = .6) +
+  # Adding letters
+  geom_label(data = rm_rcbd_cld_kndap_wrong,
+            aes(x = fdap, y = emmean, label = letter),
+            fill = "white") +
+  labs(x = "Harvest, days after planting",
+       y = "Yield (kg/ha)") +
+  scale_fill_viridis_d() +
+  facet_grid(.~trtname) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position = "none")
+
+```
+
+Not too many differences in inference from both models when it comes to the letter display.  
+
+# Conclusions  
+Our data included a **time variable** and thus it should be analyzed using **repeated measure techniques**.
+
+After checking 9 repeated measure models and their correlation matrices on model residuals, we found **weak overall evidence for correlated errors**.
+
+That was observed when **default model was the selected one** if using **BIC**, and the fact that even for **AIC** the **numerical difference was small** between best and second best model (just a few points).  
+
+Due to that, using either models (default or general) produced the same pairwise comparison interpretations.
+
+This is not always the case!
+
+In cases with **more strongly correlated errors**, you would see a larger difference in AIC and BIC among different models, and the proper model selection at the end could make a **HUGE difference on inference**.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
