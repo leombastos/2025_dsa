@@ -19,7 +19,6 @@ In specific, you will be asked to:
 
 # Instructions  
   - Move this script into the `code` subfolder of your `08_iteration` project  
-  - Move the **wheat_nk_balkh_rm.csv** data set into the `data` subfolder  
   - On this script, fill your name under the `title` section of the YAML  
   - On this script, you will be asked to:  
     - Import the raw soybeans data set used in the `02_wrangling` project  
@@ -68,7 +67,7 @@ Rename this file to `Assignment-08-iteration-LASTNAME.html`.
 
 For ex., mine would be `Assignment-08-iteration-Bastos.html`.
 
-Submit your work by uploading the **html** file to **eLC Assigment #8 - Iteration** by Mar 18 11:59 pm.  
+Submit your work by uploading the **html** file to **eLC Assignment #8 - Iteration** by Mar 18 11:59 pm.  
   
 
 
