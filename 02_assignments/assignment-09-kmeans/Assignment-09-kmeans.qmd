@@ -30,7 +30,13 @@ You will first need to watch (and code along with) the following k-means video:
   - On this script, fill your name under the `title` section of the YAML  
   - Go back to the class k-means script, choose a different number of k than what we did in class, and run it.    
 
-# Questions TBD
+# Questions  
+## 1. What number of k did you select? Why?  
+
+## 2. How many observations are there in each cluster?  
+
+## 3. Using the `fviz_cluster()` function, import here the original plot with k=4 did in class, and the new one with the number of k you selected for this exercise. How do they visually compare? Which one seems to be a better choice, and why?  
+
 
 # Submitting your work  
 Once you have developed all the code and answers, make sure to Render this quarto file.  
