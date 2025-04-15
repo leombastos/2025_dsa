@@ -1,0 +1,101 @@
+---
+title: "Data Science Applied to Ag - Final Project - Design"
+author: "FULL NAME STUDENT 1 & FULL NAME STUDENT 2"
+format:
+  html:
+    code-fold: false
+    embed-resources: true
+    toc: true
+    number-sections: true
+    theme: cerulean
+---
+
+# Instructions  
+This file contains both the **instructions** for the mid-term project and placeholders for your code. You are required to use this file to produce code, output, and answers to the questions below.  
+
+Besides simply creating output, make sure to interpret the output. You will need to create tables and/or plots to arrive at the answers, and then comment on what you found below it.    
+
+To get you setup, you will need to:  
+
+  - Student #1: create a repository on your GitHub account. You can call this repository "2025dsa_finalproject_groupX", **where X is the number of your group**. Make it public, add a README, add a .gitignore for R.  
+  - Student #1: follow the steps we did in class to start a new RStudio project with version control.  
+  - Student #1: in your computer, create the sub-folders code, data, output, and move your data set into the `data` folder. Also, student 1 moves this current script into the `code` folder. Do a git stage, commit, push.  
+  - Student #1: on GitHub, go the repository settings and invite your partner to be a collaborator in the repository. That will give them push permission.  
+  - Now, both students should clone this repository on their computers like we did in class. Make sure this step works well and that you can pull and push from GitHub.  
+  - Student 2, after cloning, does a git pull to get all these updates on their computer.  
+  - Student 1 and 2 work together to update the README file. README files should explain what the repository is about, the goals of that project, who is working in it, and any other important details you may find.  
+  
+# Introduction  
+Describe here the introduction of your problem. Consider this as a shortened version of your paper, where you will briefly discuss in 3-4 paragraphs what is the issue/gap in literature, and how the data you collected will help answer this gap.  
+
+# Hypothesis and objectives  
+Describe here your hypothesis, followed by your objectives. Make sure your hypothesis are testable and bold, and objectives are clear.  
+
+# Material and Methods  
+Describe here your overall material and methods as it pertains to the analysis you will conduct, including study description, site/setup description, what equipment was used, etc. just like you would in a paper. Make sure to clearly explain what was measured and how.
+
+## Study design  
+Clearly describe your study design here, including treatment design (which factors and levels, the hierarchy among them, etc.), and your experimental design (number of reps/blocks, how was randomization performed, etc.), as we talked about in class.  
+
+
+## Statistical analysis  
+Describe here your statistical analysis, including what type of ANOVA model you ran (based on the design above), what was your response variable, what were your explanatory variables and how were the explanatory variables treated (random or fixed). Provide your alpha level. Explain which function from which package you used to analyze this data. Explain how you checked linear model assumptions and whether or not they were met. Overall, make sure you explain in sufficient detail that, if given your data, a knowledgeable person would be able to reproduce your analysis exactly.  
+
+# Results  
+Here is where the coding is going to happen, and it will be completely up to you. Include under this section as many sub-sections (using ##) and as many chunks needed to create the analytical workflow for your analysis, starting at loading packages and data, wrangling, EDA, modeling, assumptions checking, ANOVA table, means, pairwise comparisons, and final publication-quality plot.  
+
+Make sure to run a model that reflects your study design. Even if your study design does not include one of the designs covered in class, you are still expected to run the most appropriate model. If you need help for references, let me know.  
+
+Before each chunk, describe the steps being performed in that chunk. For example, "Here I will load the data".  
+
+If a chunk produces output, like printing a data frame, statistical summary, a plot, ANOVA table, etc., make sure to write text interpreting what you see and how you can/will use that information to move forward to the next steps in the workflow.  
+
+# Team work in GitHub  
+Whether you are working with your future-self or as duos, make sure to stage, commit, and push after finishing each of the sub-sections above. When committing, write commit messages that are short and descriptive (e.g., finished wrangling).  
+
+If you are working in duos, make sure to split the workload. I will check your collaborative work through the commit history, and if one student has contributed significantly more than the other, than that will impact grades.  
+
+**Tip 1**: to avoid merge conflicts, make sure to **pull** first, and then start working locally. That will ensure that any changes made by your partner will be "downloaded" before you make changes to the files locally.  
+
+**Tip 2**: make use of the Issues on this repository to set up to-do lists and assign tasks to different people. You can also use each issue/task to discuss how things should be run and get to an agreement.  
+
+# Submitting your work  
+Once you have developed all the code and answers, make sure to Render this quarto file.  
+
+**Notes on rendering**:  
+
+- Make sure to render your work and inspect how the final html look like.  
+- If it does not look professional for whatever reason, then fix the issue, re-render it, recheck.  
+- Only send me your work once your html file looks professional.  
+- Some potential issues you may encounter and how to fix them:   
+  - Some times your code may be creating a table output that is waaay to long and cumbersome to scroll through when rendered. If this is the case, make it more professional looking by using the `head()` function to only print the first handful of rows (instead of thousands of rows).  
+  
+  - **DO NOT** delete the file's heading levels (# and ##). They set up the proper heading 1 and 2 levels, and I use them to guide my grading.  
+  
+  - If a given chunk is also outputting warnings or messages, inhibit this behavior by changing the chunk options `message` and `warning` to `FALSE`.  
+  
+  - If, after rendered, 2 lines of text are connected and you wish to "break line" between them, add 2 extra spaces after the first one.  
+
+After rendering, an .html file will be created on your `code` folder.  
+
+Rename this file to `LASTNAME1-LASTNAME2_finalproject.html`.    
+For ex., `Bastos-Mendes_finalproject.html`.
+
+Submit the html file on eLC by **April 30th** 11:59 pm.    
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
