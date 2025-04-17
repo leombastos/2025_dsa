@@ -9,7 +9,7 @@ author: FIRST LAST
 ---
 
 # A. Introduction  
-This file contains both the **instructions** for the final project.  
+This file contains the **instructions** for the final project.  
 
 To get you setup, you will need to:  
 
